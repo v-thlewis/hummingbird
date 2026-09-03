@@ -14,3 +14,9 @@
 - Format: `black <file> --line-length 127` — CAUTION: this sandbox's black version reformats
   `x ** 2` -> `x**2` repo-wide unrelated to any diff; revert such incidental hunks to keep PRs minimal.
 - No benchmark runner script found beyond `benchmarks/` dir (manual scripts, not pytest-integrated).
+
+## Update 2026-09-03
+- Sandbox default `python3` is PyPy 3.9 (no scipy/sklearn wheels available, build fails on
+  OpenBLAS/meson). Use CPython instead: `/opt/hostedtoolcache/Python/3.12.14/x64/bin/python3 -m venv <path>`
+  then `pip install numpy scikit-learn torch onnxconverter-common psutil pytest packaging flake8 black dill`
+  (dill needed for tvm_containers import chain even when tvm itself isn't installed).

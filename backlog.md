@@ -25,3 +25,22 @@
 ## Backlog cursor
 Next run: continue scanning `_one_hot_encoder_implementations.py` and `_tree_implementations.py`
 forward() methods for per-predict hot loops (Task 2/3), then consider Task 6 (benchmark infra proposal).
+
+## Update 2026-09-03
+- [DONE] Code-Level LOW->confirmed MEDIUM impact: `_utils.py` all nine `*_installed()` helpers
+  (torch/onnx_ml_tools/onnx_runtime/sparkml/sklearn/lightgbm/xgboost/tvm/pandas/prophet) re-ran
+  import machinery on every call. Added `functools.lru_cache(maxsize=None)` to each. Benchmark
+  (200k calls): torch_installed 1.50s->0.008s (~194x), sklearn_installed 0.022s->0.008s (~2.7x),
+  pandas_installed (not installed) 12.61s->0.008s (~1570x, failing imports are expensive).
+  Full test suite: 37 failed/352 passed identical on main vs branch (pre-existing failures,
+  verified via git stash). flake8 clean. PR: efficiency/cache-installed-checks.
+- Remaining candidates unchanged: `_tree_implementations.py` conversion-time loops, 
+  `onnx/tree_ensemble.py` nested loops, `_one_hot_encoder_implementations.py` forward() loops
+  over num_columns (confirmed these DO run per-forward-call — worth investigating next: could
+  vectorize the per-column eq/cat pattern, MEDIUM priority now upgraded from LOW).
+
+## Backlog cursor
+Next run: investigate `_one_hot_encoder_implementations.py` OneHotEncoder.forward() — loops over
+num_columns building list of eq() results then torch.cat; confirmed this runs per predict call
+(not conversion-time only). Consider vectorizing with a single batched comparison if categories
+are same-length, or benchmark current cost. Then Task 6 (benchmark infra proposal, still not done).
