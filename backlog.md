@@ -54,3 +54,7 @@ Next run: investigate `_one_hot_encoder_implementations.py` OneHotEncoder.forwar
 num_columns building list of eq() results then torch.cat; confirmed this runs per predict call
 (not conversion-time only). Consider vectorizing with a single batched comparison if categories
 are same-length, or benchmark current cost. Then Task 6 (benchmark infra proposal, still not done).
+
+## 2026-11-13 run (43521524680)
+- SVC not yet on main; no re-measure possible.
+- Measured `*_installed()` on main: 0-44us per call (failed import ~43us), conversion-time only. NEGLIGIBLE; DROP the lru_cache candidate (also risks breaking tests that mock imports).
