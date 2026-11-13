@@ -60,6 +60,9 @@ safe-outputs:
     target: "*"
     max: 1
 
+checkout:
+  fetch-depth: 0
+
 # Fork-specific: pre-install the same Python test environment as the parent project's CI
 # (.github/workflows/pythonapp.yml, Python 3.11 job) so the agent can measure and test.
 steps:
@@ -432,8 +435,8 @@ This repository is a personal fork used to find and measure efficiency improveme
 - **The Python environment is already installed.** A setup step installs Python 3.11 with torch 2.4.1 (CPU), numpy 1.26.4, scikit-learn <1.5, the ONNX extras, flake8 and pytest, plus an editable install of this repository (`pip install -e ".[tests,onnx]"`), matching the parent project's CI. Use `python` on `PATH`; run tests from the repository root with `python -m pytest tests/<file> -q`. If something else is missing, install it with `python -m pip install` (PyPI is reachable) instead of stopping. Never report the task incomplete only because a dependency was missing before you tried installing it.
 - **Stay inside this fork.** Create issues, PRs, and comments only in `${{ github.repository }}`. Never mention, link, or cross-reference the parent repository's issues, PRs, or users (no `owner/repo#123` references and no `@mentions` of parent maintainers), because such mentions create visible backlinks in the parent repository.
 - **Do not open PRs for work already submitted upstream.** Memory file `upstreamed.md` lists changes the fork owner has submitted to the parent project. Treat those as done; do not re-implement or re-propose them.
-- **Re-measure merged changes (do this on every run, before other tasks).** For each entry in `upstreamed.md` with status `merged - awaiting re-measure`:
-  1. Confirm the change is present on `main` (check the listed file/function).
+- **Re-measure merged changes (do this on every run, before other tasks).** For each entry in `upstreamed.md` whose status is `submitted - awaiting merge` or `merged - awaiting re-measure`:
+  1. Check whether the change is present on `main` using the entry's "How to tell it is merged" check. If it is not, leave the entry unchanged and skip it.
   2. Run the comparison script, using the recorded pre-merge SHA as `--before` and `main` as `--after`:
      `python .github/efficiency-benchmarks/remeasure.py --before <pre-merge-sha> --after main --rounds 5`
      (dependencies are pre-installed; see above).
