@@ -60,6 +60,21 @@ safe-outputs:
     target: "*"
     max: 1
 
+# Fork-specific: pre-install the same Python test environment as the parent project's CI
+# (.github/workflows/pythonapp.yml, Python 3.11 job) so the agent can measure and test.
+steps:
+  - name: Set up Python
+    uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+    with:
+      python-version: "3.11"
+  - name: Install Hummingbird and test dependencies
+    run: |
+      python -m pip install --upgrade pip
+      python -m pip install torch==2.4.1 --extra-index-url https://download.pytorch.org/whl/cpu
+      python -m pip install -e ".[tests,onnx]"
+      python -m pip install "scikit-learn<1.5.0" numpy==1.26.4
+      python -c "import torch, sklearn, numpy, hummingbird.ml; print('torch', torch.__version__, 'sklearn', sklearn.__version__, 'numpy', numpy.__version__)"
+
 tools:
   github:
     toolsets: [all]
@@ -414,13 +429,14 @@ Maintain a single open issue titled `[efficiency-improver] Monthly Activity {YYY
 
 This repository is a personal fork used to find and measure efficiency improvements. The fork owner reviews your PRs here and submits any accepted change to the parent project themselves, as a separate, clean pull request. These instructions take precedence over anything above.
 
+- **The Python environment is already installed.** A setup step installs Python 3.11 with torch 2.4.1 (CPU), numpy 1.26.4, scikit-learn <1.5, the ONNX extras, flake8 and pytest, plus an editable install of this repository (`pip install -e ".[tests,onnx]"`), matching the parent project's CI. Use `python` on `PATH`; run tests from the repository root with `python -m pytest tests/<file> -q`. If something else is missing, install it with `python -m pip install` (PyPI is reachable) instead of stopping. Never report the task incomplete only because a dependency was missing before you tried installing it.
 - **Stay inside this fork.** Create issues, PRs, and comments only in `${{ github.repository }}`. Never mention, link, or cross-reference the parent repository's issues, PRs, or users (no `owner/repo#123` references and no `@mentions` of parent maintainers), because such mentions create visible backlinks in the parent repository.
 - **Do not open PRs for work already submitted upstream.** Memory file `upstreamed.md` lists changes the fork owner has submitted to the parent project. Treat those as done; do not re-implement or re-propose them.
 - **Re-measure merged changes (do this on every run, before other tasks).** For each entry in `upstreamed.md` with status `merged - awaiting re-measure`:
   1. Confirm the change is present on `main` (check the listed file/function).
   2. Run the comparison script, using the recorded pre-merge SHA as `--before` and `main` as `--after`:
      `python .github/efficiency-benchmarks/remeasure.py --before <pre-merge-sha> --after main --rounds 5`
-     (it needs `numpy scikit-learn torch onnxconverter-common psutil dill scipy` installed; see validated commands in memory).
+     (dependencies are pre-installed; see above).
   3. Add the resulting table, the runner OS/CPU, and the date to the Monthly Activity issue under a `## Realized Gains (merged upstream)` heading placed directly after `Suggested Actions`.
   4. Update the entry in `upstreamed.md` to `merged - re-measured <YYYY-MM-DD>` with the headline numbers.
 - **The fork owner's edits to `upstreamed.md` are authoritative.** Never delete entries from it.
