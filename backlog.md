@@ -1,5 +1,15 @@
 # Efficiency Backlog
 
+## 2026-11-13 - re-fork note (read first)
+- This fork was re-created from the parent project's `main`. Earlier runs analysed a stale non-default
+  branch, so file paths/line numbers below may not match `main`. Re-verify each candidate against `main`.
+- SVC vectorization: DONE and submitted upstream by the fork owner - see `upstreamed.md`. Do not re-implement.
+  (On `main` the code lives in `hummingbird/ml/operator_converters/_sv_implementations.py`, not `sklearn/sv.py`.)
+- `_utils.py` `*_installed()` caching: the earlier PR was LOST when the old fork was deleted; it was never
+  submitted upstream. Re-verified 2026-11-13: `hummingbird/ml/_utils.py` on `main` still has no caching
+  (no `lru_cache`). Top candidate to redo (Task 3), re-measure on `main`.
+
+## History from previous fork (stale branch)
 ## Done
 - [DONE] Code-Level HIGH: `hummingbird/ml/operator_converters/sklearn/sv.py` SVC.forward() had a
   per-predict-call Python double loop over class pairs (O(n_classes^2) x O(support vectors)) building
